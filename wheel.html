@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Positive Trait Wheel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            opacity: 0.8;
+            background: conic-gradient(
+                rgba(255,107,107,0.7) 0deg 9deg, rgba(78,205,196,0.7) 9deg 18deg, rgba(69,183,209,0.7) 18deg 27deg, 
+                rgba(255,160,122,0.7) 27deg 36deg, rgba(152,216,200,0.7) 36deg 45deg, rgba(240,98,146,0.7) 45deg 54deg, 
+                rgba(174,213,129,0.7) 54deg 63deg, rgba(255,213,79,0.7) 63deg 72deg, rgba(77,182,172,0.7) 72deg 81deg, 
+                rgba(121,134,203,0.7) 81deg 90deg, rgba(255,138,101,0.7) 90deg 99deg, rgba(129,199,132,0.7) 99deg 108deg, 
+                rgba(100,181,246,0.7) 108deg 117deg, rgba(186,104,200,0.7) 117deg 126deg, rgba(255,183,77,0.7) 126deg 135deg, 
+                rgba(77,208,225,0.7) 135deg 144deg, rgba(240,98,146,0.7) 144deg 153deg, rgba(161,136,127,0.7) 153deg 162deg, 
+                rgba(149,117,205,0.7) 162deg 171deg, rgba(79,195,247,0.7) 171deg 180deg, rgba(255,241,118,0.7) 180deg 189deg, 
+                rgba(255,138,101,0.7) 189deg 198deg, rgba(129,199,132,0.7) 198deg 207deg, rgba(100,181,246,0.7) 207deg 216deg, 
+                rgba(186,104,200,0.7) 216deg 225deg, rgba(255,183,77,0.7) 225deg 234deg, rgba(77,208,225,0.7) 234deg 243deg, 
+                rgba(240,98,146,0.7) 243deg 252deg, rgba(161,136,127,0.7) 252deg 261deg, rgba(149,117,205,0.7) 261deg 270deg, 
+                rgba(79,195,247,0.7) 270deg 279deg, rgba(255,241,118,0.7) 279deg 288deg, rgba(255,138,101,0.7) 288deg 297deg, 
+                rgba(129,199,132,0.7) 297deg 306deg, rgba(100,181,246,0.7) 306deg 315deg, rgba(186,104,200,0.7) 315deg 324deg, 
+                rgba(255,183,77,0.7) 324deg 333deg, rgba(77,208,225,0.7) 333deg 342deg, rgba(240,98,146,0.7) 342deg 351deg, 
+                rgba(161,136,127,0.7) 351deg 360deg
+            );
+        }
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid #e0e0e0;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3700B3;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #6200EE;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 27px;
+        }
+        #history {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wheel-container">
+            <div class="wheel" id="wheel"></div>
+            <div class="pointer"></div>
+        </div>
+        <button onclick="spinWheel()">Spin the Wheel</button>
+        <div id="result"></div>
+        <div id="history"></div>
+    </div>
+
+    <script>
+        const traits = [
+            'Adaptable', 'Brave', 'Compassionate', 'Dedicated', 'Empathetic',
+            'Forgiving', 'Generous', 'Honest', 'Imaginative', 'Joyful',
+            'Kind', 'Loyal', 'Motivated', 'Nurturing', 'Optimistic',
+            'Patient', 'Quick-witted', 'Reliable', 'Supportive', 'Thoughtful',
+            'Understanding', 'Versatile', 'Wise', 'Xenial', 'Youthful',
+            'Zealous', 'Ambitious', 'Caring', 'Determined', 'Enthusiastic',
+            'Friendly', 'Gracious', 'Humorous', 'Intelligent', 'Modest',
+            'Observant', 'Perseverant', 'Resourceful', 'Sincere', 'Tolerant'
+        ];
+
+        let isSpinning = false;
+        let currentDegrees = 0;
+        let startTime = null;
+        const spinDuration = 5000; // Spin duration in milliseconds (5 seconds)
+        const spinSpeed = 0.5; // Speed multiplier (1 = normal speed, 2 = twice as fast, 0.5 = half speed)
+        const history = [];
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+
+            const wheel = document.getElementById('wheel');
+            const result = document.getElementById('result');
+            const randomDegrees = Math.floor(Math.random() * 360) + 1440;
+            currentDegrees = 0;
+            startTime = null;
+
+            wheel.style.transition = 'none';
+            wheel.style.transform = 'rotate(0deg)';
+            void wheel.offsetWidth; // Trigger reflow
+            wheel.style.transition = `transform ${spinDuration / 1000 / spinSpeed}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
+            wheel.style.transform = `rotate(${randomDegrees}deg)`;
+
+            function updateWheel(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = (timestamp - startTime) * spinSpeed;
+                
+                if (progress < spinDuration) {
+                    currentDegrees = easeOutCubic(progress, 0, randomDegrees, spinDuration);
+                    const sector = Math.floor(currentDegrees % 360 / (360 / traits.length));
+                    result.textContent = `Trait: ${traits[sector]}`;
+                    requestAnimationFrame(updateWheel);
+                } else {
+                    isSpinning = false;
+                    const finalSector = Math.floor(randomDegrees % 360 / (360 / traits.length));
+                    const finalTrait = traits[finalSector];
+                    result.textContent = `Your positive trait: ${finalTrait}`;
+                    updateHistory(finalTrait);
+                }
+            }
+
+            requestAnimationFrame(updateWheel);
+        }
+
+        function easeOutCubic(t, b, c, d) {
+            t /= d;
+            t--;
+            return c * (t * t * t + 1) + b;
+        }
+
+        function updateHistory(trait) {
+            history.unshift(trait);
+            if (history.length > 5) history.pop();
+            const historyElement = document.getElementById('history');
+            historyElement.innerHTML = 'Recent traits: ' + history.join(', ');
+        }
+    </script>
+</body>
+</html>
